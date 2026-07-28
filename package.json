@@ -1,0 +1,42 @@
+{
+  "name": "sirhu-rpa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "dev:watch": "nodemon --exec ts-node src/index.ts",
+    "start:siamo": "tsx src/core/StartRunner.ts siamo",
+    "start:entry": "tsx src/core/StartRunner.ts",
+    "task": "tsx src/core/TaskRunner.ts",
+    "prod:siamo": "node dist/core/StartRunner.js siamo",
+    "prod:build": "npm run build && npx playwright install chromium"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "@types/node-fetch": "^2.6.13",
+    "dotenv": "^17.4.2",
+    "https-proxy-agent": "^9.1.0",
+    "mssql": "^11.0.1",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^9.0.3",
+    "playwright": "^1.62.0",
+    "playwright-extra": "^4.3.6",
+    "proxy-chain": "^3.0.0",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "random-useragent": "^0.5.0",
+    "user-agents": "^2.1.129"
+  },
+  "devDependencies": {
+    "@types/mssql": "^9.1.7",
+    "@types/node": "^26.1.1",
+    "@types/random-useragent": "^0.3.3",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.23.1",
+    "typescript": "^7.0.2"
+  }
+}
