@@ -32,8 +32,8 @@ class SiamoRPA {
             `SELECT TOP ${solToProcessCount} vrpa.*, usr.email 
             FROM T_G_verificacion_RPA AS vrpa
             INNER JOIN T_G_usrs AS usr ON usr.usr = vrpa.documento
-            WHERE vrpa.estado_RPA = ? AND vrpa.documento = ?`,
-            ['P', '1004163783']
+            WHERE vrpa.estado_RPA = ?`,
+            ['P']
         );
 
         if (toValidate.length == 0) {
@@ -94,23 +94,23 @@ class SiamoRPA {
             );
 
             // Si es positiva la validación, se envia un correo
-            if(response.success){
-                await (new Mailer).send({
-                    to: personData.email!,
-                    subject: 'Verificación SIAMO',
-                    template: 'SIAMO/verifify.template.html',
-                    data: {
-                        nombre: [
-                            personData.firstName, 
-                            personData.middleName, 
-                            personData.lastName, 
-                            personData.middleLastName
-                        ].filter(Boolean).join(' ').toUpperCase(),
-                        mensaje: 'Su información ha sido validada correctamente. Puede continuar con el proceso.'
-                    }
-                });
-            }
-
+            await (new Mailer).send({
+                to: personData.email!,
+                subject: response.success ? 'Verificación SIAMO' : 'Error en Verificación SIAMO',
+                template: 'SIAMO/verifify.template.html',
+                data: {
+                    nombre: [
+                        personData.firstName, 
+                        personData.middleName, 
+                        personData.lastName, 
+                        personData.middleLastName
+                    ].filter(Boolean).join(' ').toUpperCase(),
+                    mensaje: response.success 
+                        ? 'Su información ha sido validada correctamente. Puede continuar con el proceso.'
+                        : 'No se pudo validar la información suministrada con anterioridad; detalle: ' + response.message
+                }
+            });
+            
         }
 
         await this.connection.close();
