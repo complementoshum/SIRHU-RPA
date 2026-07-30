@@ -71,8 +71,8 @@ class SiamoRPA {
             // Si no es cedula, se marca como invalido y se continua
             if (personData.documentType != 'C') {
                 await this.connection.query(
-                    `UPDATE T_G_verificacion_RPA SET rpa_msg_response = ? WHERE id = ?, estado_RPA = ?`,
-                    ['El tipo de documento no es Cédula de Ciudadanía', personData.id, 'F']
+                    `UPDATE T_G_verificacion_RPA SET rpa_msg_response = ?, estado_RPA = ? WHERE id = ?`,
+                    ['El tipo de documento no es Cédula de Ciudadanía', 'F', personData.id]
                 );
                 continue;
             }
