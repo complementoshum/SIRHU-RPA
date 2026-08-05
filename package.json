@@ -28,6 +28,7 @@
     "proxy-chain": "^3.0.0",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "random-useragent": "^0.5.0",
+    "rebrowser-playwright": "^1.52.0",
     "user-agents": "^2.1.129"
   },
   "devDependencies": {

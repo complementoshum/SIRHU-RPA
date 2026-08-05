@@ -2,6 +2,7 @@ import { Page } from 'playwright';
 import { createSimpleBrowser } from '../../core/BrowserFactory';
 import MedidasCorrectivasParams from '../../params/ESTUDIO_ANTECEDENTES/MedidasCorrectivas.params';
 import { ParserUtil } from '../../utils/Parser.util';
+import { RunTaskResponse } from '../../core/TaskRunner';
 
 export interface PersonInterface {
     id: number;
@@ -23,12 +24,7 @@ interface Outcome {
 const POST_CLICK_TIMEOUT = 15000;
 const POLL_INTERVAL = 500;
 
-export interface MedidasCorrectivasResult {
-    success: boolean;
-    message: string;
-}
-
-export async function run(person: PersonInterface): Promise<MedidasCorrectivasResult> {
+export async function run(person: PersonInterface): Promise<RunTaskResponse> {
     const {browser, context} = await createSimpleBrowser();
 
     const page = await context.newPage();

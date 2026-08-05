@@ -1,25 +1,24 @@
-import fetch from 'node-fetch';
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { createFreshProfileBrowser } from '../core/BrowserFactory';
 
 (async () => {
-    const username = 'customer-jamesx13_UXncG';
-    const password = 'Jamesrudasx13+';
-    const country = 'US';
-    const proxy = 'pr.oxylabs.io:7777';
 
-    // Codifica las credenciales para manejar el '+'
-    const encodedUser = encodeURIComponent(username);
-    const encodedPass = encodeURIComponent(password);
+  const { browser, context} = await createFreshProfileBrowser();
 
-    // Construye la URL con las partes ya codificadas
-    const proxyUrl = `http://${encodedUser}-cc-${country}:${encodedPass}@${proxy}`;
+  try {
+    const page = await context.newPage();
+    await page.goto('https://procesojudicial.ramajudicial.gov.co/Justicia21/Administracion/Ciudadanos/frmConsulta');
+    
+    await page.click('xpath=/html/body/form/div[4]/div/fieldset/div[2]/ul/li[2]/a');
+    await page.selectOption('xpath=/html/body/form/div[4]/div/fieldset/div[2]/div[3]/div[2]/div/div[1]/div[1]/select', '1');
+    await page.fill('xpath=/html/body/form/div[4]/div/fieldset/div[2]/div[3]/div[2]/div/div[1]/div[2]/input', '1004163783');
+    await page.click('xpath=/html/body/form/div[4]/div/fieldset/div[2]/div[4]/div/input[1]');
 
-    const agent = new HttpsProxyAgent(proxyUrl);
+    await page.waitForTimeout(40000);
 
-    const response = await fetch('https://ip.oxylabs.io/location', {
-        method: 'get',
-        agent: agent,
-    });
-
-    console.log(await response.text());
+  } catch (error) {
+    console.error('Error:', error);
+  } finally {
+    await context.close();
+    await browser?.close();
+  }
 })();
