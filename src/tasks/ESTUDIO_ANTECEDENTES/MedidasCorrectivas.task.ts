@@ -25,7 +25,7 @@ const POST_CLICK_TIMEOUT = 15000;
 const POLL_INTERVAL = 500;
 
 export async function run(person: PersonInterface): Promise<RunTaskResponse> {
-    const {browser, context} = await createSimpleBrowser();
+    const {browser, context} = await createSimpleBrowser(true);
 
     const page = await context.newPage();
     

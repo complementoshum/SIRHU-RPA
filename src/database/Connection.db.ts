@@ -22,11 +22,19 @@ export interface DbConfig {
   };
 }
 
+export enum DatabaseType {
+  SIRHU = 'SIRHU',
+  SIAMO = 'SIAMO'
+}
+
 export class ConnectionDB {
+  private database: DatabaseType;
   private pool: sql.ConnectionPool | null = null;
   private config: sql.config;
 
-  constructor(config?: Partial<DbConfig>) {
+  constructor(database: DatabaseType, config?: Partial<DbConfig>) {
+    this.database = database;
+
     const envConfig = this.loadConfigFromEnv();
     const finalConfig = { ...envConfig, ...config };
 
@@ -99,7 +107,7 @@ export class ConnectionDB {
     return {
       server: process.env.DB_SERVER,
       port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
-      database: process.env.DB_DATABASE,
+      database: this.database === DatabaseType.SIRHU ? process.env.APP_DATABASE : process.env.SIAMO_DATABASE,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       options: {

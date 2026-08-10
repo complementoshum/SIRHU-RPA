@@ -1,11 +1,11 @@
-import { ConnectionDB } from "../database/Connection.db";
+import { ConnectionDB, DatabaseType } from "../database/Connection.db";
 import { PersonInterface } from "../tasks/ESTUDIO_ANTECEDENTES/MedidasCorrectivas.task";
 import { runTask, RunTaskResponse } from "../core/TaskRunner";
 import Mailer from "../utils/Mailer.util";
 
 class SiamoRPA {
 
-    protected connection = new ConnectionDB();
+    protected connection = new ConnectionDB(DatabaseType.SIAMO);
 
     public async start() {
         this.getPersonsToValidate()

@@ -6,7 +6,7 @@ import * as path from 'path';
 // Aplica el plugin stealth una única vez
 chromium.use(StealthPlugin());
 
-export async function createSimpleBrowser() {
+export async function createSimpleBrowser(headless: boolean = false) {
 
     const launchArgs = [
         '--no-sandbox',
@@ -16,12 +16,11 @@ export async function createSimpleBrowser() {
         '--start-maximized',
     ];
 
-    // Preferir Google Chrome real (mejor score en reCAPTCHA); fallback al Chromium de Playwright
     let browser;
     try {
-        browser = await chromium.launch({ headless: false, channel: 'chrome', args: launchArgs });
+        browser = await chromium.launch({ headless: headless, channel: 'chrome', args: launchArgs });
     } catch {
-        browser = await chromium.launch({ headless: false, args: launchArgs });
+        browser = await chromium.launch({ headless: headless, args: launchArgs });
     }
 
     const context = await browser.newContext({
