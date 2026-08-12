@@ -19,13 +19,13 @@ class AdresRPA {
             // Se valida si la lista esta activa
             if (! await this.querys.isActiveList()) {
                 console.log('=== El ADRES no se encuentra activo en la lista de riesgo ===');
-                return;
+                process.exit(0);
             }
 
             // Se valida si no se ha alcanzado el maximo de solicitudes en procesamiento
             if (! await this.querys.getValidSol()) {
                 console.log('=== Se ha alcanzado el limite de solicitudes en cola ===');
-                return;
+                process.exit(0);
             }
 
             // Se obtienen las solicitudes pendientes
@@ -34,7 +34,7 @@ class AdresRPA {
             // Se valida si hay solicitudes para procesar
             if (registers.length === 0) {
                 console.log('=== No hay solicitudes para procesar ===');
-                return;
+                process.exit(0);
             }
 
             // Se procesan las solicitudes
@@ -80,6 +80,27 @@ class AdresRPA {
                 if(response.success) {
                     console.log('=== Resultados encontrados ===');
 
+                    // Validación de nombres usando Jaro-Winkler
+                    const validacionNombres = ParserUtil.compararNombres(
+                        {
+                            nombre_1: register.nombre1 ?? '',
+                            nombre_2: register.nombre2 ?? '',
+                            apellido_1: register.apellido1 ?? '',
+                            apellido_2: register.apellido2 ?? ''
+                        },
+                        response.person.names,
+                        response.person.lastNames,
+                        {
+                            result_no: 'OK',
+                            results_observ: 'OBSERVACION',
+                            result_alert: 'ALERTA'
+                        }
+                    );
+
+                    // Obtener IDs de departamento y ciudad
+                    const departmentId = await this.querys.getDeparmentId(response.person.department);
+                    const cityId = await this.querys.getCityId(response.person.city, departmentId);
+
                     const dataToUpdate = {
                         respuestaRPA: response.message,
                         fechaEjecucion: new Date(),
@@ -91,9 +112,9 @@ class AdresRPA {
                         departamentoRespuesta: response.person.department,
                         ciudadRespuesta: response.person.city,
                         epsRespuesta: response.person.epsName,
-                        validacionNombres: null,
-                        idDepartamentoAdres: null,
-                        idCiudadAdres: null,
+                        validacionNombres: validacionNombres.observacion,
+                        idDepartamentoAdres: departmentId,
+                        idCiudadAdres: cityId,
                     }
 
                     await this.querys.updateInfoRequest(register.idSolicitud, dataToUpdate);
@@ -105,6 +126,7 @@ class AdresRPA {
 
             }
             
+            await this.querys.close();
             process.exit(0);
 
         } catch (error) {

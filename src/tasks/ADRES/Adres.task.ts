@@ -14,10 +14,34 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
 
         await page.locator(AdresParams.selectDocumentType).selectOption(documentType);
         await page.locator(AdresParams.inputDocument).fill(documentNumber);
-        await page.locator(AdresParams.btnSearch).click();
 
-        // Esperar hasta que se abra una nueva pestaña y obtenerla
-        const newPage = await context.waitForEvent('page');
+        // Intentar abrir la nueva pestaña con reintentos
+        const maxRetries = 3;
+        let newPage = null;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                await page.locator(AdresParams.btnSearch).click();
+                
+                // Esperar hasta que se abra una nueva pestaña con timeout de 15 segundos
+                newPage = await context.waitForEvent('page', { timeout: 15000 });
+                break; // Si se abre la pestaña, salir del loop
+            } catch (error) {
+                console.log(`Intento ${attempt}/${maxRetries}: No se abrió la nueva pestaña, reintentando...`);
+                
+                if (attempt === maxRetries) {
+                    throw new Error(`No se pudo abrir la nueva pestaña después de ${maxRetries} intentos`);
+                }
+                
+                // Esperar un momento antes de reintentar
+                await page.waitForTimeout(1000);
+            }
+        }
+
+        // Verificar que la nueva pestaña se haya abierto
+        if (!newPage) {
+            throw new Error('No se pudo abrir la nueva pestaña');
+        }
 
         // Cambiar al focus de la nueva pestaña
         await newPage.bringToFront();

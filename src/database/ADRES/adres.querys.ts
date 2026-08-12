@@ -91,4 +91,36 @@ export default class AdresQuerys {
         await this.connection.query(`UPDATE T_RPA_AdresSolicitudes SET ${keys.join(' = ?, ')} = ? WHERE idSolicitud = ?`, [...values, idSolicitud])
     }
 
+    /**
+     * @function getDeparmentId
+     * @description Obtiene el ID de un departamento
+     * @param description {string} Descripción del departamento
+     * @returns {Promise<string>} ID del departamento
+     */
+    public async getDeparmentId(description: string): Promise<string> {
+        const response = await this.connection.query(`SELECT idDepartamento FROM T_G_departamentos WHERE descripcion = ?`, [description]) as any[]
+        return response[0].idDepartamento ?? ''
+    }
+
+    /**
+     * @function getCityId
+     * @description Obtiene el ID de una ciudad
+     * @param description {string} Descripción de la ciudad
+     * @param departmentId {string} ID del departamento
+     * @returns {Promise<string>} ID de la ciudad
+     */
+    public async getCityId(description: string, departmentId: string): Promise<string> {
+        const response = await this.connection.query(`SELECT idCiudad FROM T_G_ciudades WHERE descripcion = ? AND idDepartamento = ?`, [description, departmentId]) as any[]
+        return response[0].idCiudad ?? ''
+    }
+
+    /**
+     * @function close
+     * @description Cierra la conexión con la base de datos
+     * @returns {Promise<void>}
+     */
+    public async close(): Promise<void> {
+        await this.connection.close();
+    }
+
 }
