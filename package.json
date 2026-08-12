@@ -13,8 +13,8 @@
     "task": "tsx src/core/TaskRunner.ts",
     "prod:siamo": "node dist/core/StartRunner.js siamo",
     "start:siamo": "tsx src/core/StartRunner.ts siamo",
-    "prod:adres": "node dist/core/StartRunner.js adres/adres",
-    "start:adres": "tsx src/core/StartRunner.ts adres/adres"
+    "prod:adres": "node dist/core/StartRunner.js ADRES/adres",
+    "start:adres": "tsx src/core/StartRunner.ts ADRES/adres"
   },
   "keywords": [],
   "type": "commonjs",
