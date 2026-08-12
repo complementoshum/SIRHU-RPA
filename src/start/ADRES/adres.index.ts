@@ -102,10 +102,10 @@ class AdresRPA {
 
                 // Si es desconocido, se lanza un error
                 throw new Error('Respuesta desconocida');
-                
-            }
 
-            return;
+            }
+            
+            process.exit(0);
 
         } catch (error) {
             console.error('Error en el proceso ADRES:', error);
