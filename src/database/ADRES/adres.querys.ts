@@ -98,6 +98,9 @@ export default class AdresQuerys {
      * @returns {Promise<string>} ID del departamento
      */
     public async getDeparmentId(description: string): Promise<string> {
+        if (description.toUpperCase().includes('D.C.')) {
+            description = 'BOGOTA'
+        }
         const response = await this.connection.query(`SELECT idDepartamento FROM T_G_departamentos WHERE descripcion LIKE CONCAT('%', ?, '%')`, [description]) as any[]
         return response[0].idDepartamento ?? ''
     }
@@ -110,6 +113,12 @@ export default class AdresQuerys {
      * @returns {Promise<string>} ID de la ciudad
      */
     public async getCityId(description: string, departmentId: string): Promise<string> {
+        if (description.toUpperCase().includes('D.C.')) {
+            description = 'BOGOTA'
+        }
+        if (description.toUpperCase().includes('SANTIAGO DE CALI')) {
+            description = 'CALI'
+        }
         const response = await this.connection.query(`SELECT idCiudad FROM T_G_ciudades WHERE descripcion LIKE CONCAT('%', ?, '%') AND idDepartamento = ?`, [description, departmentId]) as any[]
         return response[0].idCiudad ?? ''
     }
