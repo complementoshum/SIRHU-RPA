@@ -72,7 +72,7 @@ class DifuntosRPA {
 
     private async getValidateLive() {
         const initialNits = this.getInitialNits();
-        const solicitudes = await this.connection.query('SELECT TOP 1 * FROM T_difuntos_RPA WHERE muerto IS NULL AND nit IN (' + initialNits + ')');
+        const solicitudes = await this.connection.query('SELECT TOP 10 * FROM T_difuntos_RPA WHERE muerto IS NULL AND nit IN (' + initialNits + ')');
         return solicitudes;
     }
 
