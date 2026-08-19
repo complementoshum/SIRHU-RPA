@@ -27,16 +27,20 @@ export async function run(
         // Esperar a que cargue el resultado
         const result = await page.waitForSelector(Paramas.result, { timeout: 20000 });
         const resultText = await result.textContent();
-        
-        if(resultText?.toLocaleLowerCase().includes('muerte')) isDead = true;
 
-        return { 
+        if (resultText?.toLocaleLowerCase().includes('muerte')) isDead = true;
+
+        return {
             isDead,
             screenshot: (await page.screenshot({ type: 'webp' })).toString('base64')
-         };
+        };
 
     } catch (error) {
         return null;
+    } finally {
+        await context.close();
+        await page.close();
     }
+    
 
 }
