@@ -59,6 +59,7 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
                 epsName: '',
                 epsRegime: '',
                 epsStartedDate: '',
+                epsEndDate: '',
                 epsPersonType: '',
                 screenShot: (await newPage.screenshot({ type: 'webp' })).toString('base64')
             }
@@ -82,6 +83,7 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
             epsName: await newPage.locator(AdresParams.epsName).textContent() || '',
             epsRegime: await newPage.locator(AdresParams.epsRegime).textContent() || '',
             epsStartedDate: await newPage.locator(AdresParams.epsStartedDate).textContent() || '',
+            epsEndDate: await newPage.locator(AdresParams.epsEndDate).textContent() || '',
             epsPersonType: await newPage.locator(AdresParams.epsPersonType).textContent() || '',
             screenShot: (await newPage.screenshot({ type: 'png' })).toString('base64')
         }

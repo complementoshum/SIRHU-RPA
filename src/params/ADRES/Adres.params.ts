@@ -7,6 +7,7 @@ export interface PersonScrapinng {
     epsName: string;
     epsRegime: string;
     epsStartedDate: string;
+    epsEndDate: string;
     epsPersonType: string;
     screenShot: string;
 } 
@@ -31,6 +32,7 @@ export default {
     epsName: "xpath=/html/body/form/div[3]/div[2]/table/tbody/tr[2]/td[2]",
     epsRegime: "xpath=/html/body/form/div[3]/div[2]/table/tbody/tr[2]/td[3]",
     epsStartedDate: "xpath=/html/body/form/div[3]/div[2]/table/tbody/tr[2]/td[4]",
+    epsEndDate: "xpath=/html/body/form/div[3]/div[2]/table/tbody/tr[2]/td[5]",
     epsPersonType: "xpath=/html/body/form/div[3]/div[2]/table/tbody/tr[2]/td[6]",
     // Errores
     errorNoResults: "xpath=//*[@id='lblError']"

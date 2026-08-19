@@ -1,3 +1,11 @@
+export interface RegistraduriaCertificadoResponse {
+    success: boolean;
+    message: string;
+    screenshot?: string;
+    isDead?: boolean;
+    deadDate?: string | null;
+}
+
 export default {
     // Consulta del certificado
     documentNumber: "#ContentPlaceHolder1_TextBox1",

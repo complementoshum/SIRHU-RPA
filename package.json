@@ -11,10 +11,15 @@
     "dev:watch": "nodemon --exec ts-node src/index.ts",
     "start:entry": "tsx src/core/StartRunner.ts",
     "task": "tsx src/core/TaskRunner.ts",
+
     "prod:siamo": "node dist/core/StartRunner.js siamo",
     "start:siamo": "tsx src/core/StartRunner.ts siamo",
+
     "prod:adres": "node dist/core/StartRunner.js ADRES/adres",
-    "start:adres": "tsx src/core/StartRunner.ts ADRES/adres"
+    "start:adres": "tsx src/core/StartRunner.ts ADRES/adres",
+    
+    "prod:difuntos": "node dist/core/StartRunner.js difuntos",
+    "start:difuntos": "tsx src/core/StartRunner.ts difuntos"
   },
   "keywords": [],
   "type": "commonjs",
@@ -34,6 +39,7 @@
     "random-useragent": "^0.5.0",
     "rebrowser-playwright": "^1.52.0",
     "sharp": "^0.35.3",
+    "tesseract.js": "^7.0.0",
     "user-agents": "^2.1.129"
   },
   "devDependencies": {
