@@ -44,7 +44,12 @@ export async function createFreshProfileBrowser() {
 
     // Perfil persistente en la raíz del proyecto; se borra y recrea en cada llamada
     const profileDir = path.join(process.cwd(), 'browser-profile');
-    fs.rmSync(profileDir, { recursive: true, force: true });
+    try {
+        fs.rmSync(profileDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+    } catch {
+        // Si falla, intentar eliminar archivos individualmente
+        console.warn('No se pudo eliminar el perfil del navegador, continuando con el existente...');
+    }
     fs.mkdirSync(profileDir, { recursive: true });
 
     // Preferir Google Chrome real (mejor score en reCAPTCHA); fallback al Chromium de Playwright
