@@ -58,10 +58,25 @@ export async function run(
         };
 
     } catch (error) {
-        return null;
+        console.error('Error en DefuncionesRegistraduria:', error);
+        // Intentar tomar screenshot incluso en caso de error
+        let screenshot = '';
+        try {
+            screenshot = (await page.screenshot({ type: 'webp' })).toString('base64');
+        } catch {
+            // Si no se puede tomar screenshot, continuar sin él
+        }
+        return {
+            success: false,
+            isDead: false,
+            screenshot
+        };
     } finally {
-        await context.close();
-        await page.close();
+        try {
+            await context.close();
+        } catch {
+            // Ignorar errores al cerrar
+        }
     }
     
 
