@@ -22,7 +22,11 @@ class DifuntosRPA {
             const date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '')
             const img = await ParserUtil.base64ToWebp(`/Documentacion/produccion/complementos/validacion_defunciones/${solicitud.nit}_${date}.webp`, response.screenshot || '');
 
-            await this.connection.query('UPDATE T_difuntos_RPA SET muerto = ?, url_soporte = ? WHERE id = ?', [(response.isDead ? 1 : 0), img, solicitud.id]);
+            if(response.success) {
+                await this.connection.query('UPDATE T_difuntos_RPA SET muerto = ?, url_soporte = ? WHERE id = ?', [(response.isDead ? 1 : 0), img, solicitud.id]);
+            } else {
+                await this.connection.query('UPDATE T_difuntos_RPA SET estado = ?, url_soporte = ? WHERE id = ?', ['E', img, solicitud.id]);
+            }
 
         }
 
@@ -71,8 +75,8 @@ class DifuntosRPA {
     }
 
     private async getValidateLive() {
-        const solicitudes = await this.connection.query(`SELECT TOP 10 * FROM T_difuntos_RPA WHERE muerto IS NULL AND nit IN (
-            SELECT DISTINCT [No. Identificación] FROM [complementos].[dbo].[seguridad_social_2023])
+        const solicitudes = await this.connection.query(`SELECT TOP 10 * FROM T_difuntos_RPA WHERE muerto IS NULL AND estado = 'P'
+            AND nit IN (SELECT DISTINCT [No. Identificación] FROM [complementos].[dbo].[seguridad_social_2023]) 
         `);
         return solicitudes;
     }

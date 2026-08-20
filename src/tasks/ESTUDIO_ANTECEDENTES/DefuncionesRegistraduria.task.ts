@@ -1,4 +1,4 @@
-import { createFreshProfileBrowser } from "../../core/BrowserFactory";
+import { createChromeWithVPN, createFreshProfileBrowser } from "../../core/BrowserFactory";
 import Paramas, { DefuncionesRegistraduriaResponse } from "../../params/ESTUDIO_ANTECEDENTES/DefuncionesRegistraduria.params";
 
 export async function run(
@@ -24,6 +24,19 @@ export async function run(
         await page.fill(Paramas.documentNumber, documentNumber);
         await page.click(Paramas.searchButton);
 
+        // Verificar si el documento no existe
+        const noExists = page.locator(Paramas.noExists);
+        if (
+            await noExists.isVisible() && 
+            (await noExists.textContent())?.toLowerCase().includes('no existe')
+        ) {
+            return {
+                success: false,
+                isDead: false,
+                screenshot: (await page.screenshot({ type: 'webp' })).toString('base64')
+            };
+        }
+
         // Esperar a que cargue el resultado
         const result = await page.waitForSelector(Paramas.result, { timeout: 20000 });
         const resultText = await result.textContent();
@@ -31,6 +44,7 @@ export async function run(
         if (resultText?.toLocaleLowerCase().includes('muerte')) isDead = true;
 
         return {
+            success: true,
             isDead,
             screenshot: (await page.screenshot({ type: 'webp' })).toString('base64')
         };
@@ -44,3 +58,5 @@ export async function run(
     
 
 }
+
+run ({documentNumber: '6713505'})
