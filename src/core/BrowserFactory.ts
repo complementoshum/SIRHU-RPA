@@ -42,26 +42,11 @@ export async function createFreshProfileBrowser() {
         '--start-maximized',
     ];
 
-    // Perfil persistente en la raíz del proyecto; se borra y recrea en cada llamada
-    const profileDir = path.join(process.cwd(), 'browser-profile');
-    
-    // Eliminar archivos de bloqueo de Chrome que impiden abrir el perfil
-    const lockFiles = ['SingletonLock', 'SingletonSocket', 'SingletonCookie'];
-    for (const lockFile of lockFiles) {
-        const lockPath = path.join(profileDir, lockFile);
-        try {
-            fs.rmSync(lockPath, { force: true });
-        } catch {
-            // Ignorar si no existe
-        }
-    }
-    
-    try {
-        fs.rmSync(profileDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
-    } catch {
-        // Si falla, continuar con el perfil existente (ya se eliminaron los locks)
-        console.warn('No se pudo eliminar el perfil del navegador, continuando con el existente...');
-    }
+    // Usar directorio temporal del sistema con ID único para evitar colisiones
+    const os = require('os');
+    const tmpDir = os.tmpdir();
+    const uniqueId = `browser-profile-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+    const profileDir = path.join(tmpDir, uniqueId);
     fs.mkdirSync(profileDir, { recursive: true });
 
     // Preferir Google Chrome real (mejor score en reCAPTCHA); fallback al Chromium de Playwright
