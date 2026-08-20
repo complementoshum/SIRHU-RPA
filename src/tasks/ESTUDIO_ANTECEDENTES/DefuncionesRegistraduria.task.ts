@@ -24,12 +24,22 @@ export async function run(
         await page.fill(Paramas.documentNumber, documentNumber);
         await page.click(Paramas.searchButton);
 
+        // Esperar a que aparezca alguno de los dos resultados posibles
+        const resultLocator = page.locator(Paramas.result);
+        const noExistsLocator = page.locator(Paramas.noExists);
+
+        // Esperar hasta que alguno de los dos elementos sea visible
+        await Promise.race([
+            resultLocator.waitFor({ state: 'visible', timeout: 20000 }).catch(() => null),
+            noExistsLocator.waitFor({ state: 'visible', timeout: 20000 }).catch(() => null)
+        ]);
+
+        // Pequeña pausa para asegurar que el contenido esté cargado
+        await page.waitForTimeout(500);
+
         // Verificar si el documento no existe
-        const noExists = page.locator(Paramas.noExists);
-        if (
-            await noExists.isVisible() && 
-            (await noExists.textContent())?.toLowerCase().includes('no existe')
-        ) {
+        const noExistsText = await noExistsLocator.textContent().catch(() => '');
+        if (noExistsText?.toLowerCase().includes('no existe')) {
             return {
                 success: false,
                 isDead: false,
@@ -37,11 +47,9 @@ export async function run(
             };
         }
 
-        // Esperar a que cargue el resultado
-        const result = await page.waitForSelector(Paramas.result, { timeout: 20000 });
-        const resultText = await result.textContent();
-
-        if (resultText?.toLocaleLowerCase().includes('muerte')) isDead = true;
+        // Verificar el resultado de defunción
+        const resultText = await resultLocator.textContent().catch(() => '');
+        if (resultText?.toLowerCase().includes('muerte')) isDead = true;
 
         return {
             success: true,
@@ -58,5 +66,3 @@ export async function run(
     
 
 }
-
-run ({documentNumber: '6713505'})
