@@ -7,6 +7,27 @@ import * as path from 'path';
 // Aplica el plugin stealth una única vez (solo para chromium, no es compatible con Firefox)
 chromium.use(StealthPlugin());
 
+// Detectar el ejecutable de Chrome/Chromium del sistema
+function getSystemChromePath(): string | undefined {
+    const possiblePaths = [
+        '/usr/bin/google-chrome',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/snap/bin/chromium',
+        // Windows paths
+        'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+        'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    ];
+    
+    for (const chromePath of possiblePaths) {
+        if (fs.existsSync(chromePath)) {
+            return chromePath;
+        }
+    }
+    return undefined;
+}
+
 export async function createSimpleBrowser(headless: boolean = false) {
 
     const launchArgs = [
@@ -17,11 +38,20 @@ export async function createSimpleBrowser(headless: boolean = false) {
         '--start-maximized',
     ];
 
+    const executablePath = getSystemChromePath();
+    
     let browser;
     try {
+        // Intentar con Google Chrome channel primero
         browser = await chromium.launch({ headless: headless, channel: 'chrome', args: launchArgs });
     } catch {
-        browser = await chromium.launch({ headless: headless, args: launchArgs });
+        // Fallback: usar ejecutable del sistema si está disponible
+        if (executablePath) {
+            browser = await chromium.launch({ headless: headless, executablePath, args: launchArgs });
+        } else {
+            // Último recurso: dejar que Playwright intente encontrar uno
+            browser = await chromium.launch({ headless: headless, args: launchArgs });
+        }
     }
 
     const context = await browser.newContext({
@@ -49,7 +79,9 @@ export async function createFreshProfileBrowser() {
     const profileDir = path.join(tmpDir, uniqueId);
     fs.mkdirSync(profileDir, { recursive: true });
 
-    // Preferir Google Chrome real (mejor score en reCAPTCHA); fallback al Chromium de Playwright
+    const executablePath = getSystemChromePath();
+
+    // Preferir Google Chrome real (mejor score en reCAPTCHA); fallback al Chromium del sistema
     let context;
     try {
         context = await chromium.launchPersistentContext(profileDir, {
@@ -59,11 +91,21 @@ export async function createFreshProfileBrowser() {
             viewport: null,
         });
     } catch {
-        context = await chromium.launchPersistentContext(profileDir, {
-            headless: false,
-            args: launchArgs,
-            viewport: null,
-        });
+        // Fallback: usar ejecutable del sistema si está disponible
+        if (executablePath) {
+            context = await chromium.launchPersistentContext(profileDir, {
+                headless: false,
+                executablePath,
+                args: launchArgs,
+                viewport: null,
+            });
+        } else {
+            context = await chromium.launchPersistentContext(profileDir, {
+                headless: false,
+                args: launchArgs,
+                viewport: null,
+            });
+        }
     }
 
     const browser = context.browser();
@@ -115,6 +157,8 @@ export async function createChromeWithVPN(headless: boolean = false) {
         '--start-maximized',
     ];
 
+    const executablePath = getSystemChromePath();
+
     let context;
     try {
         // Intentar usar Google Chrome instalado
@@ -125,12 +169,21 @@ export async function createChromeWithVPN(headless: boolean = false) {
             viewport: null,
         });
     } catch {
-        // Fallback a Chromium de Playwright
-        context = await chromium.launchPersistentContext(profileDir, {
-            headless: headless,
-            args: launchArgs,
-            viewport: null,
-        });
+        // Fallback: usar ejecutable del sistema si está disponible
+        if (executablePath) {
+            context = await chromium.launchPersistentContext(profileDir, {
+                headless: headless,
+                executablePath,
+                args: launchArgs,
+                viewport: null,
+            });
+        } else {
+            context = await chromium.launchPersistentContext(profileDir, {
+                headless: headless,
+                args: launchArgs,
+                viewport: null,
+            });
+        }
     }
 
     const browser = context.browser();
