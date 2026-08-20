@@ -14,22 +14,13 @@ class DifuntosRPA {
 
         for (const solicitud of unknowLiveStatus) {
 
-            const response: DefuncionesRegistraduriaResponse | null = await runTask('ESTUDIO_ANTECEDENTES/DefuncionesRegistraduria', {
+            const response: DefuncionesRegistraduriaResponse = await runTask('ESTUDIO_ANTECEDENTES/DefuncionesRegistraduria', {
                 documentNumber: solicitud.nit
             });
 
-            // Si no hay respuesta, marcar como error y continuar
-            if (!response) {
-                console.error(`No se obtuvo respuesta para NIT: ${solicitud.nit}`);
-                await this.connection.query('UPDATE T_difuntos_RPA SET estado = ? WHERE id = ?', ['E', solicitud.id]);
-                continue;
-            }
-
             // Guardar la captura
             const date = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '')
-            const img = response.screenshot 
-                ? await ParserUtil.base64ToWebp(`/Documentacion/produccion/complementos/validacion_defunciones/${solicitud.nit}_${date}.webp`, response.screenshot)
-                : null;
+            const img = await ParserUtil.base64ToWebp(`/Documentacion/produccion/complementos/validacion_defunciones/${solicitud.nit}_${date}.webp`, response.screenshot || '');
 
             if(response.success) {
                 await this.connection.query('UPDATE T_difuntos_RPA SET muerto = ?, url_soporte = ? WHERE id = ?', [(response.isDead ? 1 : 0), img, solicitud.id]);
