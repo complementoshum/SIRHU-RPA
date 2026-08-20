@@ -44,10 +44,22 @@ export async function createFreshProfileBrowser() {
 
     // Perfil persistente en la raíz del proyecto; se borra y recrea en cada llamada
     const profileDir = path.join(process.cwd(), 'browser-profile');
+    
+    // Eliminar archivos de bloqueo de Chrome que impiden abrir el perfil
+    const lockFiles = ['SingletonLock', 'SingletonSocket', 'SingletonCookie'];
+    for (const lockFile of lockFiles) {
+        const lockPath = path.join(profileDir, lockFile);
+        try {
+            fs.rmSync(lockPath, { force: true });
+        } catch {
+            // Ignorar si no existe
+        }
+    }
+    
     try {
         fs.rmSync(profileDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
     } catch {
-        // Si falla, intentar eliminar archivos individualmente
+        // Si falla, continuar con el perfil existente (ya se eliminaron los locks)
         console.warn('No se pudo eliminar el perfil del navegador, continuando con el existente...');
     }
     fs.mkdirSync(profileDir, { recursive: true });
