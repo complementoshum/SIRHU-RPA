@@ -75,8 +75,12 @@ class DifuntosRPA {
     }
 
     private async getValidateLive() {
-        const solicitudes = await this.connection.query(`SELECT TOP 10 * FROM T_difuntos_RPA WHERE muerto IS NULL AND estado = 'P'
-            AND nit IN (SELECT DISTINCT [No. Identificación] FROM [complementos].[dbo].[seguridad_social_2023]) 
+        const solicitudes = await this.connection.query(`
+            SELECT TOP 10 * FROM T_difuntos_RPA WITH(NOLOCK)
+            WHERE muerto IS NULL AND estado = 'P'
+            AND nit IN (
+                SELECT * FROM T_distinct_seguridad_2023
+            ) 
         `);
         return solicitudes;
     }
