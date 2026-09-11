@@ -98,7 +98,7 @@ export class ParserUtil {
      * @param base64 {string} Imagen en base64
      * @returns {Promise<string>} Ruta del archivo webp
      */
-    public static async base64ToWebp(filePath: string, base64: string): Promise<string> {
+    public static async base64ToWebp(filePath: string, base64: string, isForWindows: boolean = false): Promise<string> {
         const base64Data = base64.replace(/^data:image\/\w+;base64,/, '');
         const imageBuffer = Buffer.from(base64Data, 'base64');
         
@@ -107,7 +107,15 @@ export class ParserUtil {
             fs.mkdirSync(dir, { recursive: true });
         }
 
-        const outputPath = filePath.endsWith('.webp') ? filePath : `${filePath}.webp`;
+        let outputPath = ''
+
+        if(isForWindows) {
+            const baseWindowsVol = "Z:\\"
+            const newWindowsPath = filePath.replace('/Documentacion/', '').replaceAll('/', '\\')
+            outputPath = baseWindowsVol + (newWindowsPath.endsWith('.webp') ? newWindowsPath : `${newWindowsPath}.webp`);
+        } else {
+            outputPath = filePath.endsWith('.webp') ? filePath : `${filePath}.webp`;
+        }
 
         await sharp(imageBuffer)
             .webp({ quality: 80 })
