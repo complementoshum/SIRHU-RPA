@@ -69,15 +69,26 @@ export async function createRealProfileBrowser(headless: boolean = false, profil
         console.log(`Perfil creado (vacío, se poblará al abrir Chrome): ${userDataDir}`);
     }
 
-    const context = await patchrightChromium.launchPersistentContext(userDataDir, {
+    const contextOptions = {
         headless,
-        channel: 'chrome',
         args: launchArgs,
         viewport: null,
         acceptDownloads: true,
         locale: 'es-CO',
         timezoneId: 'America/Bogota',
-    });
+    };
+
+    // Preferir Google Chrome instalado; fallback al Chromium empaquetado de patchright
+    let context;
+    try {
+        context = await patchrightChromium.launchPersistentContext(userDataDir, {
+            ...contextOptions,
+            channel: 'chrome',
+        });
+    } catch {
+        console.log('Google Chrome no encontrado, usando Chromium empaquetado');
+        context = await patchrightChromium.launchPersistentContext(userDataDir, contextOptions);
+    }
 
     await context.addInitScript(() => {
         // Esta es la forma más robusta de eliminarla.
