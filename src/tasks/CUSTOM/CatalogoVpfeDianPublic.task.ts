@@ -25,9 +25,10 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
     const blobPromise = new Promise<string>(r => { resolveBlob = r })
     await context.exposeFunction('__rpaSaveBlob', (b64: string) => resolveBlob(b64))
     await context.addInitScript(() => {
+        // Capturar el blob del PDF apenas se crea
         const origCreate = URL.createObjectURL.bind(URL)
         URL.createObjectURL = (obj: any) => {
-            if (obj instanceof Blob && obj.type === 'application/pdf') {
+            if (obj instanceof Blob && (obj.type === 'application/pdf' || obj.size > 10000)) {
                 obj.arrayBuffer().then(buf => {
                     const bytes = new Uint8Array(buf)
                     let binary = ''
@@ -38,6 +39,16 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
                 })
             }
             return origCreate(obj)
+        }
+
+        // Bloquear el clic de descarga en anchors blob:: ese "clic" convierte la
+        // pestaña en pestaña-de-descarga y Chrome la descarta antes de que
+        // termine la extracción a base64. Sin el clic, la pestaña sobrevive
+        // y la captura siempre completa
+        const origClick = HTMLAnchorElement.prototype.click
+        HTMLAnchorElement.prototype.click = function (this: HTMLAnchorElement) {
+            if (typeof this.href === 'string' && this.href.startsWith('blob:')) return
+            return origClick.call(this)
         }
     })
 
@@ -77,13 +88,21 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
             new Promise<string>((_, rej) => setTimeout(() => rej(new Error(`[${document}] Timeout esperando el blob del PDF`)), 180000))
         ])
 
+        const buffer = Buffer.from(base64, 'base64')
+        console.log(`[${document}] Blob capturado: ${buffer.length} bytes`)
+
+        // Validar que sea un PDF completo antes de declarar éxito
+        if (buffer.length < 1000 || !buffer.subarray(0, 5).toString('latin1').startsWith('%PDF-')) {
+            throw new Error(`[${document}] El blob capturado no es un PDF válido (${buffer.length} bytes)`)
+        }
+
         const now = new Date()
         const pad = (n: number) => String(n).padStart(2, '0')
         const timestamp = `${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
         const fileName = `${document}_${timestamp}.pdf`
         const destPath = path.join(params.downloadPath, fileName)
 
-        fs.writeFileSync(destPath, Buffer.from(base64, 'base64'))
+        fs.writeFileSync(destPath, buffer)
 
         // Ruta retornada siempre en formato Windows, sin importar el SO donde corra
         result = `J:\\TI\\Caso UGPP\\RPA DIAN\\${fileName}`
