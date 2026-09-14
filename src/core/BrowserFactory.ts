@@ -65,7 +65,8 @@ export async function createRealProfileBrowser(headless: boolean = false, profil
         path.join(process.cwd(), 'chrome_real' + (profileIndex != null ? '_' + profileIndex : ''));
 
     if (!fs.existsSync(userDataDir)) {
-        throw new Error(`No existe el directorio de perfil clonado: ${userDataDir}`);
+        fs.mkdirSync(userDataDir, { recursive: true });
+        console.log(`Perfil creado (vacío, se poblará al abrir Chrome): ${userDataDir}`);
     }
 
     const context = await patchrightChromium.launchPersistentContext(userDataDir, {
