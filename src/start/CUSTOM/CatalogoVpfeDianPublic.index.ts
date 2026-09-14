@@ -31,37 +31,40 @@ class CatalogoVpfeDianPublicRPA {
 
     private async procesarSolicitud(solicitud: RegisterDian, index: number) {
 
-        // Se cambia el estado a "Validando"
-        if (!this.setup) {
-            await this.connection.query(
-                `UPDATE T_consulta_RPA_DIAN SET estado = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
-                ['V', solicitud.id]
-            );
-        }
+        try {
+            // Se cambia el estado a "Validando"
+            if (!this.setup) await this.setEstado(solicitud.id, 'V');
 
-        const result = await runTask("CUSTOM/CatalogoVpfeDianPublic", {
-            cufeCode: solicitud['CUFE/CUDE'],
-            document: solicitud.nit,
-            profileIndex: index,
-            setup: this.setup
-        }) as string | false;
+            const result = await runTask("CUSTOM/CatalogoVpfeDianPublic", {
+                cufeCode: solicitud['CUFE/CUDE'],
+                document: solicitud.nit,
+                profileIndex: index,
+                setup: this.setup
+            }) as string | false;
 
-        if (!this.setup) {
+            if (this.setup) return;
+
             if (result) {
-                // Finalizó correctamente: ruta del soporte + fecha de ejecución
-                await this.connection.query(
-                    `UPDATE T_consulta_RPA_DIAN SET estado = ?, url_soporte = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
-                    ['F', result, solicitud.id]
-                );
+                // Finalizó correctamente: ruta del soporte + estado F
+                await this.setEstado(solicitud.id, 'F', result);
             } else {
-                // Algo falló en la tarea
-                await this.connection.query(
-                    `UPDATE T_consulta_RPA_DIAN SET estado = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
-                    ['E', solicitud.id]
-                );
+                // La tarea no logró descargar
+                await this.setEstado(solicitud.id, 'E');
             }
+        } catch (error) {
+            // Cualquier excepción (timeout, captcha, etc.) también marca E para que
+            // el registro no quede atascado en V
+            console.error(`[id ${solicitud.id}] Error procesando solicitud:`, error);
+            if (!this.setup) await this.setEstado(solicitud.id, 'E');
         }
-        
+
+    }
+
+    private async setEstado(id: number, estado: string, urlSoporte: string | null = null) {
+        await this.connection.query(
+            `UPDATE T_consulta_RPA_DIAN SET estado = ?, url_soporte = COALESCE(?, url_soporte), fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
+            [estado, urlSoporte, id]
+        );
     }
 
     public async getSolicitudes() {
