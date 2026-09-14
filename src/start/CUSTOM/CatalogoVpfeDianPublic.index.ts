@@ -7,9 +7,12 @@ class CatalogoVpfeDianPublicRPA {
 
     protected setup: boolean = false;
 
+    // Cantidad de solicitudes (y navegadores) procesadas por ejecución
+    protected batchSize: number = 20;
+
     public async start() {
 
-        // Si hay 10+ registros en proceso (V), esperar a que finalicen
+        // Si ya hay batchSize+ registros en proceso (V), esperar a que finalicen
         await this.esperarDisponibilidad();
 
         const solicitudes = await this.getSolicitudes();
@@ -69,7 +72,7 @@ class CatalogoVpfeDianPublicRPA {
 
     public async getSolicitudes() {
         return await this.connection.query(
-            `SELECT TOP 10 * FROM T_consulta_RPA_DIAN WHERE estado = ?`,
+            `SELECT TOP ${this.batchSize} * FROM T_consulta_RPA_DIAN WHERE estado = ?`,
             ['P']
         ) as RegisterDian[]
 
@@ -82,7 +85,7 @@ class CatalogoVpfeDianPublicRPA {
                 ['V']
             ) as any[];
 
-            if (count < 10) return;
+            if (count < this.batchSize) return;
 
             console.log(`Hay ${count} solicitudes en proceso (V). Esperando a que finalicen...`);
             await new Promise(r => setTimeout(r, 30000));
