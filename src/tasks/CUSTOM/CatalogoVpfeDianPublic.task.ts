@@ -43,6 +43,11 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         // Asegurar que existe el directorio de descarga (funciona en Windows y Linux)
         fs.mkdirSync(params.downloadPath, { recursive: true })
 
+        // Capturar cookies temprano: si el navegador muere al disparar la descarga,
+        // el fallback HTTP ya no dependerá del contexto vivo
+        const cookies = await context.cookies()
+        const cookieHeader = cookies.map((c: any) => `${c.name}=${c.value}`).join('; ')
+
         // La descarga puede llegar en la página actual o en un popup nuevo
         const downloadPromise = Promise.race([
             page.waitForEvent('download'),
@@ -66,9 +71,8 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         try {
             await download.saveAs(destPath)
         } catch {
-            // Fallback: descarga HTTP directa con las cookies de la sesión del navegador
-            const cookies = await context.cookies(downloadUrl)
-            const cookieHeader = cookies.map((c: any) => `${c.name}=${c.value}`).join('; ')
+            // Fallback: descarga HTTP con las cookies capturadas antes de la descarga
+            // (el navegador puede estar muerto a estas alturas y no pasa nada)
             const response = await fetch(downloadUrl, { headers: { cookie: cookieHeader } })
             if (!response.ok) throw new Error(`Error HTTP ${response.status} descargando ${downloadUrl}`)
             fs.writeFileSync(destPath, Buffer.from(await response.arrayBuffer()))
