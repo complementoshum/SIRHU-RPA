@@ -91,11 +91,19 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
     } catch (error) {
         console.error('Error:', error);
     } finally {
-        await context.close();
-        await browser?.close();
+        // Si Chrome crasheó, close() puede colgarse indefinidamente: se le pone
+        // timeout para que la tarea siempre retorne y el registro no quede en V
+        await closeWithTimeout(context.close())
+        if (browser) await closeWithTimeout(browser.close())
     }
 
     return result
+}
+
+const closeWithTimeout = async (p: Promise<any>, ms = 10000) => {
+    try {
+        await Promise.race([p, new Promise(r => setTimeout(r, ms))])
+    } catch { }
 }
 
 const validateResolveCf = async (page: any): Promise<boolean> => {
