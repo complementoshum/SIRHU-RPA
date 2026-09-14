@@ -85,7 +85,8 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         // navegadores en paralelo todo va más lento)
         const base64 = await Promise.race([
             blobPromise,
-            new Promise<string>((_, rej) => setTimeout(() => rej(new Error(`[${document}] Timeout esperando el blob del PDF`)), 180000))
+            // unref: si el blob llega antes, este timer no debe impedir que el proceso termine
+            new Promise<string>((_, rej) => setTimeout(() => rej(new Error(`[${document}] Timeout esperando el blob del PDF`)), 180000).unref())
         ])
 
         const buffer = Buffer.from(base64, 'base64')
@@ -121,7 +122,7 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
 
 const closeWithTimeout = async (p: Promise<any>, ms = 10000) => {
     try {
-        await Promise.race([p, new Promise(r => setTimeout(r, ms))])
+        await Promise.race([p, new Promise(r => setTimeout(r, ms).unref())])
     } catch { }
 }
 
