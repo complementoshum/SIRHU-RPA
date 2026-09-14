@@ -14,6 +14,8 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
 
         await page.locator(AdresParams.selectDocumentType).selectOption(documentType);
         await page.locator(AdresParams.inputDocument).fill(documentNumber);
+	
+	await page.waitForTimeout(1000);
 
         // Intentar abrir la nueva pestaña con reintentos
         const maxRetries = 3;

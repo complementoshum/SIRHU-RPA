@@ -101,8 +101,13 @@ export default class AdresQuerys {
         if (description.toUpperCase().includes('D.C.')) {
             description = 'BOGOTA'
         }
+
+	if (description.includes('NARINO')) description = 'NARIÑO';
+
+	if (description.toUpperCase().includes('GUAJIRA')) description = 'GUAJIRA';
+
         const response = await this.connection.query(`SELECT idDepartamento FROM T_G_departamentos WHERE descripcion LIKE CONCAT('%', ?, '%')`, [description]) as any[]
-        return response[0].idDepartamento ?? ''
+        return response[response.length-1].idDepartamento ?? ''
     }
 
     /**
@@ -119,8 +124,24 @@ export default class AdresQuerys {
         if (description.toUpperCase().includes('SANTIAGO DE CALI')) {
             description = 'CALI'
         }
+
+	if (description.toUpperCase().includes('BERRIO')) {
+	    description = 'BERRIO'
+	}
+
+	if (description.toUpperCase().includes('DOS QUEBRADAS')) {
+	    description = 'DOSQUEBRADAS'
+	}
+
+	if (description.toUpperCase().includes('SANTA ROSA DE CABAL')) {
+	    description = 'S ROSA CABAL'
+	}
+
+	if (description.toUpperCase().includes('CIENAGA DE ORO')) description = 'CIENAGA D ORO';
+
         const response = await this.connection.query(`SELECT idCiudad FROM T_G_ciudades WHERE descripcion LIKE CONCAT('%', ?, '%') AND idDepartamento = ?`, [description, departmentId]) as any[]
-        return response[0].idCiudad ?? ''
+        console.log(response, departmentId)
+	return response[response.length-1].idCiudad ?? ''
     }
 
     /**
