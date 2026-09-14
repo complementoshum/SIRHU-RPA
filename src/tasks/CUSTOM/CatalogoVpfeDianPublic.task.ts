@@ -18,11 +18,34 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         return false
     }
 
+    // Interceptar el PDF en el momento que el sitio crea su Blob: la DIAN descarga
+    // vía blob: (vive solo en memoria del navegador), así que los bytes se extraen
+    // a base64 y se envían a Node de inmediato, aunque la pestaña muera después
+    let resolveBlob!: (b64: string) => void
+    const blobPromise = new Promise<string>(r => { resolveBlob = r })
+    await context.exposeFunction('__rpaSaveBlob', (b64: string) => resolveBlob(b64))
+    await context.addInitScript(() => {
+        const origCreate = URL.createObjectURL.bind(URL)
+        URL.createObjectURL = (obj: any) => {
+            if (obj instanceof Blob && obj.type === 'application/pdf') {
+                obj.arrayBuffer().then(buf => {
+                    const bytes = new Uint8Array(buf)
+                    let binary = ''
+                    for (let i = 0; i < bytes.length; i += 8192) {
+                        binary += String.fromCharCode(...bytes.subarray(i, i + 8192))
+                    }
+                    (window as any).__rpaSaveBlob(btoa(binary))
+                })
+            }
+            return origCreate(obj)
+        }
+    })
+
     const page = await context.newPage();
     let result: string | false = false
 
     try {
-        
+
         // Completar el formulario inicial
         await page.goto(params.mainPage);
         await page.waitForLoadState('networkidle');
@@ -43,43 +66,24 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         // Asegurar que existe el directorio de descarga (funciona en Windows y Linux)
         fs.mkdirSync(params.downloadPath, { recursive: true })
 
-        // Capturar cookies temprano: si el navegador muere al disparar la descarga,
-        // el fallback HTTP ya no dependerá del contexto vivo
-        const cookies = await context.cookies()
-        const cookieHeader = cookies.map((c: any) => `${c.name}=${c.value}`).join('; ')
-
-        // La descarga puede llegar en la página actual o en un popup nuevo
-        // (timeout amplio: con varios navegadores en paralelo todo va más lento)
-        const downloadPromise = Promise.race([
-            page.waitForEvent('download', { timeout: 180000 }),
-            context.waitForEvent('page', { timeout: 180000 }).then((popup: any) => popup.waitForEvent('download', { timeout: 180000 })),
-        ])
-
         await page.click(params.btnDownload)
         await page.waitForSelector(params.btnConfirmAlert)
         await page.click(params.btnConfirmAlert)
 
-        const download = await downloadPromise
-        const downloadUrl = download.url()
+        // Esperar a que el hook capture el blob del PDF (timeout amplio: con varios
+        // navegadores en paralelo todo va más lento)
+        const base64 = await Promise.race([
+            blobPromise,
+            new Promise<string>((_, rej) => setTimeout(() => rej(new Error(`[${document}] Timeout esperando el blob del PDF`)), 180000))
+        ])
 
-        const ext = path.extname(download.suggestedFilename()) || ".pdf"
         const now = new Date()
         const pad = (n: number) => String(n).padStart(2, '0')
         const timestamp = `${pad(now.getDate())}${pad(now.getMonth() + 1)}${now.getFullYear()}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
-        const fileName = `${document}_${timestamp}${ext}`
+        const fileName = `${document}_${timestamp}.pdf`
         const destPath = path.join(params.downloadPath, fileName)
 
-        try {
-            await download.saveAs(destPath)
-        } catch {
-            // Fallback: descarga HTTP con las cookies capturadas antes de la descarga
-            // (el navegador puede estar muerto a estas alturas y no pasa nada)
-            console.log(`[${document}] saveAs falló, intentando descarga HTTP. URL: ${downloadUrl}`)
-            if (!downloadUrl.startsWith('http')) throw new Error(`URL de descarga no soportada para fallback HTTP: ${downloadUrl}`)
-            const response = await fetch(downloadUrl, { headers: { cookie: cookieHeader } })
-            if (!response.ok) throw new Error(`Error HTTP ${response.status} descargando ${downloadUrl}`)
-            fs.writeFileSync(destPath, Buffer.from(await response.arrayBuffer()))
-        }
+        fs.writeFileSync(destPath, Buffer.from(base64, 'base64'))
 
         // Ruta retornada siempre en formato Windows, sin importar el SO donde corra
         result = `J:\\TI\\Caso UGPP\\RPA DIAN\\${fileName}`
