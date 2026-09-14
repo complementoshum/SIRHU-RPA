@@ -8,7 +8,7 @@ class CatalogoVpfeDianPublicRPA {
     protected setup: boolean = false;
 
     // Cantidad de solicitudes (y navegadores) procesadas por ejecución
-    protected batchSize: number = 20;
+    protected batchSize: number = 36;
 
     public async start() {
 
@@ -72,7 +72,7 @@ class CatalogoVpfeDianPublicRPA {
 
     public async getSolicitudes() {
         return await this.connection.query(
-            `SELECT TOP ${this.batchSize} * FROM T_consulta_RPA_DIAN WHERE estado = ?`,
+            `SELECT TOP 18 * FROM T_consulta_RPA_DIAN WHERE estado = ?`,
             ['P']
         ) as RegisterDian[]
 
