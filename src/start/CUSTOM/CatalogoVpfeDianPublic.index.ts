@@ -5,6 +5,8 @@ import { RegisterDian } from "../../params/CUSTOM/CatalogoVpfeDianPublic.params"
 class CatalogoVpfeDianPublicRPA {
     protected connection = new ConnectionDB(DatabaseType.COMPLE);
 
+    protected setup: boolean = true;
+
     public async start() {
 
         // Si hay 10+ registros en proceso (V), esperar a que finalicen
@@ -23,32 +25,36 @@ class CatalogoVpfeDianPublicRPA {
     private async procesarSolicitud(solicitud: RegisterDian, index: number) {
 
         // Se cambia el estado a "Validando"
-        await this.connection.query(
-            `UPDATE T_consulta_RPA_DIAN SET estado = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
-            ['V', solicitud.id]
-        );
+        if (!this.setup) {
+            await this.connection.query(
+                `UPDATE T_consulta_RPA_DIAN SET estado = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
+                ['V', solicitud.id]
+            );
+        }
 
         const result = await runTask("CUSTOM/CatalogoVpfeDianPublic", {
             cufeCode: solicitud['CUFE/CUDE'],
             document: solicitud.nit,
             profileIndex: index,
-            setup: true
+            setup: this.setup
         }) as string | false;
 
-        if (result) {
-            // Finalizó correctamente: ruta del soporte + fecha de ejecución
-            await this.connection.query(
-                `UPDATE T_consulta_RPA_DIAN SET estado = ?, url_soporte = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
-                ['F', result, solicitud.id]
-            );
-        } else {
-            // Algo falló en la tarea
-            await this.connection.query(
-                `UPDATE T_consulta_RPA_DIAN SET estado = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
-                ['E', solicitud.id]
-            );
+        if (!this.setup) {
+            if (result) {
+                // Finalizó correctamente: ruta del soporte + fecha de ejecución
+                await this.connection.query(
+                    `UPDATE T_consulta_RPA_DIAN SET estado = ?, url_soporte = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
+                    ['F', result, solicitud.id]
+                );
+            } else {
+                // Algo falló en la tarea
+                await this.connection.query(
+                    `UPDATE T_consulta_RPA_DIAN SET estado = ?, fechas_ultima_ejecucion = GETDATE() WHERE id = ?`,
+                    ['E', solicitud.id]
+                );
+            }
         }
-
+        
     }
 
     public async getSolicitudes() {
