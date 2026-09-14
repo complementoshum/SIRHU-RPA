@@ -13,10 +13,17 @@ class CatalogoVpfeDianPublicRPA {
         await this.esperarDisponibilidad();
 
         const solicitudes = await this.getSolicitudes();
+        console.log(`Solicitudes pendientes: ${solicitudes.length}`);
 
-        await Promise.allSettled(
+        const results = await Promise.allSettled(
             solicitudes.map((solicitud, index) => this.procesarSolicitud(solicitud, index))
         );
+
+        results.forEach((r, i) => {
+            if (r.status === 'rejected') {
+                console.error(`Error en solicitud ${solicitudes[i].id}:`, r.reason);
+            }
+        });
 
         await this.connection.close();
 
