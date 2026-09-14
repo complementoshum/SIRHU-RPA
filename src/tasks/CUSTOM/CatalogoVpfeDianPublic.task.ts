@@ -49,9 +49,10 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         const cookieHeader = cookies.map((c: any) => `${c.name}=${c.value}`).join('; ')
 
         // La descarga puede llegar en la página actual o en un popup nuevo
+        // (timeout amplio: con varios navegadores en paralelo todo va más lento)
         const downloadPromise = Promise.race([
-            page.waitForEvent('download'),
-            context.waitForEvent('page').then((popup: any) => popup.waitForEvent('download')),
+            page.waitForEvent('download', { timeout: 180000 }),
+            context.waitForEvent('page', { timeout: 180000 }).then((popup: any) => popup.waitForEvent('download', { timeout: 180000 })),
         ])
 
         await page.click(params.btnDownload)
@@ -73,6 +74,8 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         } catch {
             // Fallback: descarga HTTP con las cookies capturadas antes de la descarga
             // (el navegador puede estar muerto a estas alturas y no pasa nada)
+            console.log(`[${document}] saveAs falló, intentando descarga HTTP. URL: ${downloadUrl}`)
+            if (!downloadUrl.startsWith('http')) throw new Error(`URL de descarga no soportada para fallback HTTP: ${downloadUrl}`)
             const response = await fetch(downloadUrl, { headers: { cookie: cookieHeader } })
             if (!response.ok) throw new Error(`Error HTTP ${response.status} descargando ${downloadUrl}`)
             fs.writeFileSync(destPath, Buffer.from(await response.arrayBuffer()))
