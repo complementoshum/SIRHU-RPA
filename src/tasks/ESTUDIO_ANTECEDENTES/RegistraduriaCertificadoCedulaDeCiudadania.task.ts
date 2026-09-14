@@ -211,10 +211,3 @@ export async function run(
     }
 
 }
-
-// run({
-//     documentNumber: "21266308",
-//     expDay: "11",
-//     expMonth: "02",
-//     expYear: "1959"
-// })

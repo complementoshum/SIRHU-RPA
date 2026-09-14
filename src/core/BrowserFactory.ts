@@ -1,4 +1,5 @@
 import { chromium } from 'playwright-extra';
+import { chromium as patchrightChromium } from 'patchright';
 import { firefox as playwrightFirefox } from 'playwright';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import * as fs from 'fs';
@@ -19,14 +20,74 @@ export async function createSimpleBrowser(headless: boolean = false) {
 
     let browser;
     try {
-        browser = await chromium.launch({ headless: headless, channel: 'chrome', args: launchArgs });
+        browser = await patchrightChromium.launch({ headless: headless, channel: 'chrome', args: launchArgs });
     } catch {
-        browser = await chromium.launch({ headless: headless, args: launchArgs });
+        browser = await patchrightChromium.launch({ headless: headless, args: launchArgs });
     }
 
     const context = await browser.newContext({
         viewport: null,
+        acceptDownloads: true,
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     });
+
+    await context.addInitScript(() => {
+        delete Object.getPrototypeOf(navigator).webdriver;
+        Object.defineProperty(navigator, 'webdriver', {
+            get: () => false
+        });
+    });
+
+    return { browser, context };
+
+}
+
+/**
+ * Crea un Chrome usando el perfil real del usuario (cookies/sesiones reales).
+ *
+ * REQUISITO: Chrome normal debe estar COMPLETAMENTE cerrado antes de ejecutar,
+ * ya que Chrome bloquea el directorio de perfil mientras está en ejecución.
+ */
+export async function createRealProfileBrowser(headless: boolean = false, profileIndex?: number | null) {
+
+    const launchArgs = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled',
+        '--start-maximized',
+    ];
+
+    const userDataDir =
+        process.env.CHROME_USER_DATA_DIR ??
+        path.join(process.cwd(), 'chrome_real' + (profileIndex != null ? '_' + profileIndex : ''));
+
+    if (!fs.existsSync(userDataDir)) {
+        throw new Error(`No existe el directorio de perfil clonado: ${userDataDir}`);
+    }
+
+    const context = await patchrightChromium.launchPersistentContext(userDataDir, {
+        headless,
+        channel: 'chrome',
+        args: launchArgs,
+        viewport: null,
+        acceptDownloads: true,
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+    });
+
+    await context.addInitScript(() => {
+        // Esta es la forma más robusta de eliminarla.
+        delete Object.getPrototypeOf(navigator).webdriver;
+        // Alternativa por si la anterior falla en algún navegador:
+        Object.defineProperty(navigator, 'webdriver', {
+            get: () => false
+        });
+    });
+
+    const browser = context.browser();
 
     return { browser, context };
 
@@ -73,7 +134,7 @@ export async function createFreshProfileBrowser() {
 }
 
 export async function createSimpleFirefoxBrowser(headless: boolean = false) {
- 
+
     const launchArgs = [
         '-width=1920',
         '-height=1080',
@@ -85,7 +146,7 @@ export async function createSimpleFirefoxBrowser(headless: boolean = false) {
     });
 
     return { browser, context };
-    
+
 }
 
 /**
@@ -98,10 +159,10 @@ export async function createSimpleFirefoxBrowser(headless: boolean = false) {
  * 4. La extensión quedará guardada para futuras ejecuciones
  */
 export async function createChromeWithVPN(headless: boolean = false) {
- 
+
     // Perfil persistente en la raíz del proyecto - conserva extensiones entre ejecuciones
     const profileDir = path.join(process.cwd(), 'chrome-vpn-profile');
-    
+
     // Crear el directorio si no existe
     if (!fs.existsSync(profileDir)) {
         fs.mkdirSync(profileDir, { recursive: true });
@@ -136,5 +197,5 @@ export async function createChromeWithVPN(headless: boolean = false) {
     const browser = context.browser();
 
     return { browser, context };
-    
+
 }

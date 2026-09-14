@@ -16,7 +16,10 @@
     "prod:adres": "node dist/core/StartRunner.js ADRES/adres",
     "start:adres": "tsx src/core/StartRunner.ts ADRES/adres",
     "prod:difuntos": "node dist/core/StartRunner.js difuntos",
-    "start:difuntos": "tsx src/core/StartRunner.ts difuntos"
+    "start:difuntos": "tsx src/core/StartRunner.ts difuntos",
+
+    "start:dian": "tsx src/core/StartRunner.ts CUSTOM/CatalogoVpfeDianPublic",
+    "prod:dian": "node dist/core/StartRunner.js CUSTOM/CatalogoVpfeDianPublic"
   },
   "keywords": [],
   "type": "commonjs",
@@ -28,6 +31,7 @@
     "mssql": "^11.0.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^9.0.3",
+    "patchright": "^1.55.0",
     "pdf-to-img": "^6.2.0",
     "playwright": "^1.52.0",
     "playwright-core": "^1.52.0",
