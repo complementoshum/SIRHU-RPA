@@ -5,7 +5,7 @@ import { RegisterDian } from "../../params/CUSTOM/CatalogoVpfeDianPublic.params"
 class CatalogoVpfeDianPublicRPA {
     protected connection = new ConnectionDB(DatabaseType.COMPLE);
 
-    protected setup: boolean = true;
+    protected setup: boolean = false;
 
     public async start() {
 
