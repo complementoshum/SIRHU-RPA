@@ -74,6 +74,7 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         // Descarga del archivo
 
         if (!await validateResolveCf(page)) throw new Error("No se pudo resolver el captcha")
+        await new Promise(resolve => setTimeout(resolve, 500))
 
         // Asegurar que existe el directorio de descarga (funciona en Windows y Linux)
         fs.mkdirSync(params.downloadPath, { recursive: true })
