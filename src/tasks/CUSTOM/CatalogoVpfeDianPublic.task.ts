@@ -73,8 +73,9 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         
         // Descarga del archivo
 
-        if (!await validateResolveCf(page)) throw new Error("No se pudo resolver el captcha")
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // waitReset=true: esperar primero a que el indicador se reinicie (nuevo
+        // desafío detectado) y recién entonces esperar el nuevo SOLVED
+        if (!await validateResolveCf(page, true)) throw new Error("No se pudo resolver el captcha")
 
         // Asegurar que existe el directorio de descarga (funciona en Windows y Linux)
         fs.mkdirSync(params.downloadPath, { recursive: true })
@@ -129,8 +130,18 @@ const closeWithTimeout = async (p: Promise<any>, ms = 10000) => {
     } catch { }
 }
 
-const validateResolveCf = async (page: any): Promise<boolean> => {
+const validateResolveCf = async (page: any, waitReset = false): Promise<boolean> => {
     try {
+        // Fase 1 (opcional): esperar a que el indicador se reinicie, es decir que
+        // la extensión detecte el NUEVO desafío y deje de mostrar el SOLVED viejo
+        if (waitReset) {
+            await page.waitForFunction(() => {
+                const el = document.evaluate("/html/div/span[2]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+                return !el?.textContent?.toUpperCase().includes("SOLVERCF SOLVED")
+            }, null, { timeout: 15000, polling: 500 }).catch(() => { })
+        }
+
+        // Fase 2: esperar a que se resuelva el desafío actual
         await page.waitForFunction(() => {
             const el = document.evaluate("/html/div/span[2]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
             return el?.textContent?.toUpperCase().includes("SOLVERCF SOLVED")
