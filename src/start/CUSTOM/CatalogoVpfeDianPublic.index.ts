@@ -8,7 +8,7 @@ class CatalogoVpfeDianPublicRPA {
     protected setup: boolean = false;
 
     // Cantidad de solicitudes (y navegadores) procesadas por ejecución
-    protected batchSize: number = 36;
+    protected batchSize: number = 72;
 
     public async start() {
 
