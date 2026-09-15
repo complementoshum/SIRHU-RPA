@@ -80,6 +80,7 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         fs.mkdirSync(params.downloadPath, { recursive: true })
 
         await page.click(params.btnDownload)
+        await new Promise(resolve => setTimeout(resolve, 1000))
         await page.waitForSelector(params.btnConfirmAlert)
         await page.click(params.btnConfirmAlert)
 
