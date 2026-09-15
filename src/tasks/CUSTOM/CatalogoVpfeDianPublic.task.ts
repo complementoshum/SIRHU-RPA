@@ -67,7 +67,8 @@ export async function run({cufeCode, document, profileIndex, setup}: {cufeCode: 
         // Validar 
         if (!await validateResolveCf(page)) throw new Error("No se pudo resolver el captcha")
 
-        // Ingresar
+        // Ingresar esperando 500 milisegundos
+        await new Promise(resolve => setTimeout(resolve, 500))
         await page.click(params.btnSearch)
         
         // Descarga del archivo
