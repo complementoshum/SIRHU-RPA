@@ -8,7 +8,7 @@ class CatalogoVpfeDianPublicRPA {
     protected setup: boolean = false;
 
     // Cantidad de solicitudes (y navegadores) procesadas por ejecución
-    protected batchSize: number = 72;
+    protected batchSize: number = 108;
 
     public async start() {
 
@@ -41,7 +41,6 @@ class CatalogoVpfeDianPublicRPA {
             const result = await runTask("CUSTOM/CatalogoVpfeDianPublic", {
                 cufeCode: solicitud['CUFE/CUDE'],
                 document: solicitud.nit,
-                profileIndex: index,
                 setup: this.setup
             }) as string | false;
 
