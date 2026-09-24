@@ -1,21 +1,22 @@
 import { createFreshProfileBrowser } from "../../core/BrowserFactory";
 import AdresParams, { AdresResponse, PersonScrapinng } from "../../params/ADRES/Adres.params";
+import HumanMouse from "../../utils/HumanMouse.util";
 import Mailer from "../../utils/Mailer.util";
 
-export async function run( {documentNumber, documentType, notify = false}: {documentNumber: string, documentType: string, notify?: boolean} ): Promise<AdresResponse | null> {
+export async function run({ documentNumber, documentType, notify = false }: { documentNumber: string, documentType: string, notify?: boolean }): Promise<AdresResponse | null> {
 
-    const { browser, context} = await createFreshProfileBrowser();
+    const { browser, context } = await createFreshProfileBrowser();
 
     const page = await context.newPage();
 
     try {
-        
+
         await page.goto('https://aplicaciones.adres.gov.co/BDUA_Internet/Pages/ConsultarAfiliadoWeb_2.aspx');
 
         await page.locator(AdresParams.selectDocumentType).selectOption(documentType);
         await page.locator(AdresParams.inputDocument).fill(documentNumber);
-	
-	await page.waitForTimeout(1000);
+
+        await page.waitForTimeout(1000);
 
         // Intentar abrir la nueva pestaña con reintentos
         const maxRetries = 3;
@@ -23,18 +24,18 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                await page.locator(AdresParams.btnSearch).click();
-                
+                await HumanMouse.click(page, page.locator(AdresParams.btnSearch));
+
                 // Esperar hasta que se abra una nueva pestaña con timeout de 15 segundos
                 newPage = await context.waitForEvent('page', { timeout: 15000 });
                 break; // Si se abre la pestaña, salir del loop
             } catch (error) {
                 console.log(`Intento ${attempt}/${maxRetries}: No se abrió la nueva pestaña, reintentando...`);
-                
+
                 if (attempt === maxRetries) {
                     throw new Error(`No se pudo abrir la nueva pestaña después de ${maxRetries} intentos`);
                 }
-                
+
                 // Esperar un momento antes de reintentar
                 await page.waitForTimeout(1000);
             }
@@ -50,7 +51,7 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
 
         // Validar si no hay resultados
         const noResults = await newPage.locator(AdresParams.errorNoResults).isVisible();
-        
+
         if (noResults) {
             const personData: PersonScrapinng = {
                 names: '',
@@ -63,7 +64,7 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
                 epsStartedDate: '',
                 epsEndDate: '',
                 epsPersonType: '',
-                screenShot: (await newPage.screenshot({ type: 'webp' })).toString('base64')
+                screenShot: (await newPage.screenshot({ type: 'png' })).toString('base64')
             }
             return {
                 success: false,
@@ -126,3 +127,8 @@ export async function run( {documentNumber, documentType, notify = false}: {docu
     }
 
 }
+
+run({
+    documentType: 'CC',
+    documentNumber: '1004163783'
+})

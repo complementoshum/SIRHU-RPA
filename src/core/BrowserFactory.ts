@@ -91,9 +91,7 @@ export async function createRealProfileBrowser(headless: boolean = false, profil
     }
 
     await context.addInitScript(() => {
-        // Esta es la forma más robusta de eliminarla.
         delete Object.getPrototypeOf(navigator).webdriver;
-        // Alternativa por si la anterior falla en algún navegador:
         Object.defineProperty(navigator, 'webdriver', {
             get: () => false
         });
