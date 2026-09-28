@@ -128,7 +128,7 @@ export async function run({ documentNumber, documentType, notify = false }: { do
 
 }
 
-run({
-    documentType: 'CC',
-    documentNumber: '1004163783'
-})
+// run({
+//     documentType: 'CC',
+//     documentNumber: '1004163783'
+// })
