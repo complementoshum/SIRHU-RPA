@@ -13,8 +13,8 @@ export async function run({ documentNumber, documentType, notify = false }: { do
 
         await page.goto('https://aplicaciones.adres.gov.co/BDUA_Internet/Pages/ConsultarAfiliadoWeb_2.aspx');
 
-        await page.locator(AdresParams.selectDocumentType).selectOption(documentType);
-        await page.locator(AdresParams.inputDocument).fill(documentNumber);
+        await page.locator(AdresParams.selectDocumentType).selectOption(documentType.trim());
+        await page.locator(AdresParams.inputDocument).fill(documentNumber.trim());
 
         await page.waitForTimeout(1000);
 
