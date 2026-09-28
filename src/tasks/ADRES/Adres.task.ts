@@ -73,8 +73,8 @@ export async function run({ documentNumber, documentType, notify = false }: { do
             }
         }
 
-        // Esperar hasta 2 minutos a que la página termine de cargar completamente
-        await newPage.waitForLoadState('networkidle', { timeout: 120000 });
+        // Esperar hasta 3 minutos a que la página termine de cargar completamente
+        await newPage.waitForLoadState('networkidle', { timeout: 180000 });
 
         // Extraer información de la nueva pestaña
         const personData: PersonScrapinng = {
