@@ -11,15 +11,21 @@
     "dev:watch": "nodemon --exec ts-node src/index.ts",
     "start:entry": "tsx src/core/StartRunner.ts",
     "task": "tsx src/core/TaskRunner.ts",
+    
     "prod:siamo": "node dist/core/StartRunner.js siamo",
     "start:siamo": "tsx src/core/StartRunner.ts siamo",
+
     "prod:adres": "node dist/core/StartRunner.js ADRES/adres",
     "start:adres": "tsx src/core/StartRunner.ts ADRES/adres",
+
     "prod:difuntos": "node dist/core/StartRunner.js difuntos",
     "start:difuntos": "tsx src/core/StartRunner.ts difuntos",
 
     "start:dian": "tsx src/core/StartRunner.ts CUSTOM/CatalogoVpfeDianPublic",
-    "prod:dian": "node dist/core/StartRunner.js CUSTOM/CatalogoVpfeDianPublic"
+    "prod:dian": "node dist/core/StartRunner.js CUSTOM/CatalogoVpfeDianPublic",
+
+    "start:runt": "tsx src/core/StartRunner.ts CUSTOM/Runt",
+    "prod:runt": "node dist/core/StartRunner.js CUSTOM/Runt"
   },
   "keywords": [],
   "type": "commonjs",
