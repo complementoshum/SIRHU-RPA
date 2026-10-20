@@ -139,6 +139,12 @@ export default class AdresQuerys {
 
 	if (description.toUpperCase().includes('CIENAGA DE ORO')) description = 'CIENAGA D ORO';
 
+	if (description.toUpperCase().includes('LA JAGUA DE IBIRICO')) description = 'LA JAGUA IBIRIC';
+
+	if (description.toUpperCase().includes('VILLA DEL ROSARIO')) description = 'VILLA ROSARIO';
+
+	if (description.toUpperCase().includes('SAN JOSE DEL GUAVIARE')) description = 'S JOSE GUAVIA';
+
         const response = await this.connection.query(`SELECT idCiudad FROM T_G_ciudades WHERE descripcion LIKE CONCAT('%', ?, '%') AND idDepartamento = ?`, [description, departmentId]) as any[]
         console.log(response, departmentId)
 	return response[response.length-1].idCiudad ?? ''
