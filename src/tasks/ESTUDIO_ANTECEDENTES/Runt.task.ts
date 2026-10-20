@@ -1,5 +1,5 @@
 import { Locator } from "patchright";
-import { createRealProfileBrowser, createSimpleBrowser } from "../../core/BrowserFactory";
+import { createRealProfileBrowser } from "../../core/BrowserFactory";
 import RuntParams from "../../params/ESTUDIO_ANTECEDENTES/Runt.params";
 import { extractCaptchaText, setValueMatSelect } from "../../utils/Common.util";
 
@@ -8,6 +8,12 @@ export interface RuntCategoria {
     fechaExpedicion: string;
     fechaVencimiento: string;
     categoriaAntigua: string;
+}
+
+export interface RuntRequest {
+    documentType: string;
+    documentNumber: string;
+    firtslastName: string;
 }
 
 export interface RuntLicencia {
@@ -36,7 +42,7 @@ async function waitForVisible(locator: Locator, timeout: number): Promise<boolea
     }
 }
 
-export async function run({documentType, documentNumber, firtslastName}: {documentType: string, documentNumber: string, firtslastName: string}): Promise<RuntLicencia[] | null> {
+export async function run({documentType, documentNumber, firtslastName}: RuntRequest): Promise<RuntLicencia[] | null> {
 
     const { browser, context } = await createRealProfileBrowser();
     const page = await context.newPage();
@@ -52,6 +58,7 @@ export async function run({documentType, documentNumber, firtslastName}: {docume
         const noLicenseMessage = page.locator(RuntParams.noLicenseMessage).first()
 
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+
             if (attempt > 1) await page.goto(url)
 
             // Esperar que sean visible al menos un elemento
@@ -96,19 +103,26 @@ export async function run({documentType, documentNumber, firtslastName}: {docume
         if (await noLicenseMessage.isVisible()) return null
         await page.locator(RuntParams.licensesExpanded).click()
         const table = page.locator(RuntParams.licensesTable)
+
         const tableOutcome = await Promise.race([
             waitForVisible(table, 30000).then(visible => visible ? 'table' : null),
             waitForVisible(noLicenseMessage, 30000).then(visible => visible ? 'noLicense' : null)
         ])
+
         if (tableOutcome !== 'table' || await noLicenseMessage.isVisible()) return null
+
         const rows = table.locator('tbody tr.mat-row')
+
         if (!await waitForVisible(rows.first(), 10000) || await noLicenseMessage.isVisible()) return null
+
         const licencias: RuntLicencia[] = []
         const dialog = page.locator(RuntParams.licenseDetailDialog)
         const detailTable = page.locator(RuntParams.licenseDetailTable)
 
         for (let index = 0, total = await rows.count(); index < total; index++) {
+
             const row = rows.nth(index)
+
             const licencia: RuntLicencia = {
                 numeroLicencia: await cellText(row, 'numeroLicencia'),
                 otExpide: await cellText(row, 'otExpide'),
@@ -124,20 +138,27 @@ export async function run({documentType, documentNumber, firtslastName}: {docume
             await row.locator('td.mat-column-acciones a', { hasText: 'Ver Detalle' }).click()
             await detailTable.waitFor({ state: 'visible', timeout: 30000 })
             const categoryRows = detailTable.locator('tbody tr.mat-row')
+
             for (let categoryIndex = 0, count = await categoryRows.count(); categoryIndex < count; categoryIndex++) {
+
                 const categoryRow = categoryRows.nth(categoryIndex)
+
                 licencia.categorias.push({
                     categoria: await cellText(categoryRow, 'categoria'),
                     fechaExpedicion: await cellText(categoryRow, 'fechaExpedicion'),
                     fechaVencimiento: await cellText(categoryRow, 'fechaVencimiento'),
                     categoriaAntigua: await cellText(categoryRow, 'categoriaAntigua')
                 })
+                
             }
 
             const closeButton = dialog.getByRole('button', { name: /cerrar|close|salir/i }).first()
+
             if (await closeButton.isVisible()) await closeButton.click()
             else await page.keyboard.press('Escape')
+
             await dialog.waitFor({ state: 'hidden', timeout: 10000 })
+
             licencias.push(licencia)
         }
 

@@ -25,7 +25,10 @@
     "prod:dian": "node dist/core/StartRunner.js CUSTOM/CatalogoVpfeDianPublic",
 
     "start:runt": "tsx src/core/StartRunner.ts CUSTOM/Runt",
-    "prod:runt": "node dist/core/StartRunner.js CUSTOM/Runt"
+    "prod:runt": "node dist/core/StartRunner.js CUSTOM/Runt",
+
+    "start:licencias": "tsx src/core/StartRunner.ts ESTUDIO_ANTECEDENTES/ValidadorLicencias",
+    "prod:licencias": "node dist/core/StartRunner.js ESTUDIO_ANTECEDENTES/ValidadorLicencias"
   },
   "keywords": [],
   "type": "commonjs",
