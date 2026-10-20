@@ -51,7 +51,7 @@ class AdresRPA {
                 // Si es nulo, quiere decir que ocurrió un error, por lo que se pasa a estado "ERROR"
                 if (response == null) {
                     console.log('=== Error al procesar la solicitud ===');
-                    await this.querys.changeStatus(register.idSolicitud, 'E');
+                    await this.querys.changeStatus(register.idSolicitud, 'F');
                     continue;
                 }
 

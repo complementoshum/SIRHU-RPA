@@ -3,7 +3,7 @@ export default {
     // Data
     complementosNit: "890930022",
     // Download path (Windows: "J:/TI/Caso UGPP/RPA DIAN" | Linux: "/mnt/ti/caso_ugpp/rpa_dian")
-    downloadPath: "J:/TI/Caso UGPP/RPA DIAN",
+    downloadPath: "/UGPP/RPA DIAN",
     // Frm
     mainPage: 'https://catalogo-vpfe.dian.gov.co/User/SearchDocument',
     cufeCode: "xpath=//*[@id='DocumentKey']",
