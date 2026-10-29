@@ -32,7 +32,8 @@ class Mailer {
     private templatesBasePath: string;
     private assetsBasePath: string;
 
-    constructor() {
+    constructor(usingSirhu: boolean = false) {
+
         const config: MailConfig = {
             host: process.env.SMTP_HOST || '',
             port: parseInt(process.env.SMTP_PORT || '587'),
@@ -43,7 +44,17 @@ class Mailer {
             }
         };
 
-        this.fromAddress = process.env.SMTP_FROM || config.auth.user;
+        if (usingSirhu) {
+            config.host = process.env.SIRHU_SMTP_HOST || '';
+            config.port = parseInt(process.env.SIRHU_SMTP_PORT || '587');
+            config.secure = process.env.SIRHU_SMTP_SECURE === 'true';
+            config.auth = {
+                user: process.env.SIRHU_SMTP_USER || '',
+                pass: process.env.SIRHU_SMTP_PASS || ''
+            };
+        }
+
+        this.fromAddress = usingSirhu ? process.env.SIRHU_SMTP_FROM || config.auth.user : process.env.SMTP_FROM || config.auth.user;
         this.templatesBasePath = path.join(__dirname, '..', 'template', 'emails');
         this.assetsBasePath = path.join(__dirname, '..', 'template', 'assets');
 

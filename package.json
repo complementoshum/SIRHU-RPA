@@ -12,14 +12,14 @@
     "start:entry": "tsx src/core/StartRunner.ts",
     "task": "tsx src/core/TaskRunner.ts",
     
-    "prod:siamo": "node dist/core/StartRunner.js siamo",
-    "start:siamo": "tsx src/core/StartRunner.ts siamo",
+    "prod:siamo": "node dist/core/StartRunner.js CARIS/siamo",
+    "start:siamo": "tsx src/core/StartRunner.ts CARIS/siamo",
 
     "prod:adres": "node dist/core/StartRunner.js ADRES/adres",
     "start:adres": "tsx src/core/StartRunner.ts ADRES/adres",
 
-    "prod:difuntos": "node dist/core/StartRunner.js difuntos",
-    "start:difuntos": "tsx src/core/StartRunner.ts difuntos",
+    "prod:difuntos": "node dist/core/StartRunner.js CUSTOM/difuntos",
+    "start:difuntos": "tsx src/core/StartRunner.ts CUSTOM/difuntos",
 
     "start:dian": "tsx src/core/StartRunner.ts CUSTOM/CatalogoVpfeDianPublic",
     "prod:dian": "node dist/core/StartRunner.js CUSTOM/CatalogoVpfeDianPublic",

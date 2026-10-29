@@ -1,10 +1,10 @@
-import { runTask } from "../core/TaskRunner";
-import AdresQuerys from "../database/ADRES/adres.querys";
-import { ConnectionDB, DatabaseType } from "../database/Connection.db";
-import { AdresResponse } from "../params/ADRES/Adres.params";
-import { DefuncionesRegistraduriaResponse } from "../params/ESTUDIO_ANTECEDENTES/DefuncionesRegistraduria.params";
-import { RegistraduriaCertificadoResponse } from "../params/ESTUDIO_ANTECEDENTES/RegistraduriaCertificadoCedulaDeCiudadania.params";
-import { ParserUtil } from "../utils/Parser.util";
+import { runTask } from "../../core/TaskRunner";
+import AdresQuerys from "../../database/ADRES/adres.querys";
+import { ConnectionDB, DatabaseType } from "../../database/Connection.db";
+import { AdresResponse } from "../../params/ADRES/Adres.params";
+import { DefuncionesRegistraduriaResponse } from "../../params/ESTUDIO_ANTECEDENTES/DefuncionesRegistraduria.params";
+import { RegistraduriaCertificadoResponse } from "../../params/ESTUDIO_ANTECEDENTES/RegistraduriaCertificadoCedulaDeCiudadania.params";
+import { ParserUtil } from "../../utils/Parser.util";
 import * as fs from "fs";
 import * as path from "path";
 

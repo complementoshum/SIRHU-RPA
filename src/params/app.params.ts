@@ -48,3 +48,18 @@ export interface AdresRequest {
   idNomina: number | null;
   idBd: number;
 }
+
+export const REQUEST_RESULTS = {
+  BAD_RESULTS: {
+    message: "La consulta ha retornado resultados NEGATIVOS,  VALIDAR RESULTADOS",
+    key: "S"
+  },
+  VERIFY_RESULTS: {
+    message: "Por favor verifique los resultados de la consulta realizada.",
+    key: "O"
+  },
+  NO_RESULTS: {
+    message: "La consulta no retornó resultados negativos.",
+    key: "N"
+  }
+}

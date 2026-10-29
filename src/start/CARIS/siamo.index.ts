@@ -1,7 +1,7 @@
-import { ConnectionDB, DatabaseType } from "../database/Connection.db";
-import { PersonInterface } from "../tasks/ESTUDIO_ANTECEDENTES/MedidasCorrectivas.task";
-import { runTask, RunTaskResponse } from "../core/TaskRunner";
-import Mailer from "../utils/Mailer.util";
+import { ConnectionDB, DatabaseType } from "../../database/Connection.db";
+import { PersonInterface } from "../../tasks/ESTUDIO_ANTECEDENTES/MedidasCorrectivas.task";
+import { runTask, RunTaskResponse } from "../../core/TaskRunner";
+import Mailer from "../../utils/Mailer.util";
 
 class SiamoRPA {
 
