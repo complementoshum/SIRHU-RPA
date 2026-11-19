@@ -25,8 +25,16 @@ export interface DbConfig {
 export enum DatabaseType {
   SIRHU = 'SIRHU',
   SIAMO = 'SIAMO',
-  COMPLE = 'COMPLE'
+  COMPLE = 'COMPLE',
+  SIRHU_V4 = 'SIRHU_V4'
 }
+
+const DATABASE_ENV_VARS: Partial<Record<DatabaseType, string>> = {
+  [DatabaseType.SIRHU]: 'APP_DATABASE',
+  [DatabaseType.SIAMO]: 'SIAMO_DATABASE',
+  [DatabaseType.COMPLE]: 'APP_COMPLE',
+  [DatabaseType.SIRHU_V4]: 'APP_SIRHU_V4',
+};
 
 export class ConnectionDB {
   private database: DatabaseType;
@@ -108,9 +116,7 @@ export class ConnectionDB {
     return {
       server: process.env.DB_SERVER,
       port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
-      database: this.database === DatabaseType.SIRHU ? process.env.APP_DATABASE : 
-                this.database === DatabaseType.SIAMO ? process.env.SIAMO_DATABASE : 
-                process.env.APP_COMPLE,
+      database: process.env[DATABASE_ENV_VARS[this.database] ?? `${this.database}_DATABASE`],
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       options: {

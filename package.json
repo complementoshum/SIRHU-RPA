@@ -28,7 +28,10 @@
     "prod:runt": "node dist/core/StartRunner.js CUSTOM/Runt",
 
     "start:licencias": "tsx src/core/StartRunner.ts ESTUDIO_ANTECEDENTES/ValidadorLicencias",
-    "prod:licencias": "node dist/core/StartRunner.js ESTUDIO_ANTECEDENTES/ValidadorLicencias"
+    "prod:licencias": "node dist/core/StartRunner.js ESTUDIO_ANTECEDENTES/ValidadorLicencias",
+
+    "start:signio": "tsx src/core/StartRunner.ts SIRHU_V4/HIRING/Signio",
+    "prod:signio": "node dist/core/StartRunner.js SIRHU_V4/HIRING/Signio"
   },
   "keywords": [],
   "type": "commonjs",
