@@ -21,11 +21,11 @@ interface Outcome {
     message: string | null;
 }
 
-const POST_CLICK_TIMEOUT = 15000;
+const POST_CLICK_TIMEOUT = 60000;
 const POLL_INTERVAL = 500;
 
 export async function run(person: PersonInterface): Promise<RunTaskResponse> {
-    const {browser, context} = await createSimpleBrowser(true);
+    const {browser, context} = await createSimpleBrowser();
 
     const page = await context.newPage();
     
