@@ -31,7 +31,10 @@
     "prod:licencias": "node dist/core/StartRunner.js ESTUDIO_ANTECEDENTES/ValidadorLicencias",
 
     "start:signio": "tsx src/core/StartRunner.ts SIRHU_V4/HIRING/Signio",
-    "prod:signio": "node dist/core/StartRunner.js SIRHU_V4/HIRING/Signio"
+    "prod:signio": "node dist/core/StartRunner.js SIRHU_V4/HIRING/Signio",
+
+    "start:infolaft": "tsx src/start/INFOLAFT/Infolaft.index.ts",
+    "prod:infolaft": "node dist/start/INFOLAFT/Infolaft.index.js"
   },
   "keywords": [],
   "type": "commonjs",

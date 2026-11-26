@@ -1,6 +1,10 @@
 import { Locator, Page } from "patchright";
 import Tesseract from "tesseract.js";
 
+export function isWindows(): boolean {
+    return process.platform === 'win32';
+}
+
 export async function setValueMatSelect(
   page: Page,
   formControlName: string,
@@ -100,6 +104,16 @@ export async function setValueMatSelect(
     console.log(`Error al seleccionar ${formControlName} con valor "${valor}": ${error instanceof Error ? error.message : 'Error desconocido'}`);
     throw error;
   }
+}
+
+export async function fillAngular(page: Page, selector: string, value: string) {
+    const input = page.locator(selector);
+    await input.click();
+    await input.fill('');
+    await input.pressSequentially(value, { delay: 50 });
+    await input.dispatchEvent('input');
+    await input.dispatchEvent('change');
+    await input.blur();
 }
 
 export function normalizarTexto(texto: string): string {
